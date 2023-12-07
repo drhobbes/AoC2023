@@ -8,7 +8,18 @@ def get_lines(f):
         line = f.readline()
     return lines
 
-def update_map(pairs, lines):
+def complete_map(input_array, map_lines): # part 1, just map one number at a time
+    output_map = [0]*len(input_array)
+    for dest_start, source_start, range_len in map_lines:
+        for i in range(len(input_array)):
+            if input_array[i] >= source_start and input_array[i] < source_start + range_len:
+                output_map[i] = dest_start + (input_array[i]-source_start)
+    for i in range(len(output_map)):
+        if output_map[i] == 0:
+            output_map[i] = input_array[i]
+    return output_map
+
+def update_map(pairs, lines): # part 2, map ranges
     new_pairs = []
     for start, length in pairs:
         while length > 0:
@@ -33,7 +44,26 @@ def update_map(pairs, lines):
                     new_pairs.append([start, length])
                     length = 0
     return new_pairs
-                    
+
+# part 1: map each seed number to a location
+with open('day5_input.txt', 'r') as f:
+    # get the seed numbers
+    seeds = f.readline()
+    seeds = seeds[seeds.find(': ')+1:].split()
+    for i in range(len(seeds)):
+        seeds[i] = int(seeds[i])
+
+    # find the end of the file
+    curpos = f.tell()
+    f.seek(0,2)
+    eof = f.tell()
+    f.seek(curpos)
+
+    # until we hit the end of the file, keep updating the map
+    while f.tell() != eof:
+        lines = get_lines(f)
+        seeds = complete_map(seeds, lines)
+    print('part 1: '+str(min(seeds)))
 
 # part 2: pairs of values
 with open('../day5_input.txt','r') as f:
